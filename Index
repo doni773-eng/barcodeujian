@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotic Exam Card & QR Generator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        /* Animasi Pergerakan Background Gird & Gradasi */
+        @keyframes gradientBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #2e1065, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBg 15s ease infinite;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efek Grid Futuristik Tambahan */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(244, 63, 94, 0.1) 1px, transparent 0),
+                              radial-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 0);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        /* Animasi Judul Berdenyut (Neon Glow) */
+        @keyframes neonPulse {
+            0%, 100% { text-shadow: 0 0 10px rgba(6, 182, 212, 0.6), 0 0 20px rgba(217, 70, 239, 0.4); }
+            50% { text-shadow: 0 0 20px rgba(6, 182, 212, 0.9), 0 0 30px rgba(217, 70, 239, 0.7); }
+        }
+
+        h2 {
+            background: linear-gradient(90deg, #06b6d4, #d946ef, #f43f5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            animation: neonPulse 3s infinite;
+        }
+
+        h3 {
+            color: #f1f5f9;
+            border-left: 4px solid #d946ef;
+            padding-left: 10px;
+            margin-top: 0;
+            text-shadow: 0 0 5px rgba(219, 70, 239, 0.3);
+        }
+
+        /* Form Section Lebih Berwarna */
+        .form-section {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Garis Gradasi Animasi di Atas Form */
+        @keyframes panGrad {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #f43f5e, #d946ef, #06b6d4, #f43f5e);
+            background-size: 200% auto;
+            animation: panGrad 4s linear infinite;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #cbd5e1;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #ffffff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #d946ef;
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Tombol dengan Efek Hover Dinamis */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary { 
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); 
+            color: #ffffff; 
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-success { 
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+            color: white; 
+        }
+        .btn-success:hover {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+            filter: brightness(1.1);
+        }
+
+        .btn-danger { 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+            color: white; 
+        }
+        .btn-danger:hover {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+            filter: brightness(1.1);
+        }
+         
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            height: 1px; background: rgba(255,255,255,0.1);
+            z-index: 1;
+        }
+        .divider span {
+            background: #151829;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+            color: #94a3b8;
+            font-weight: bold;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* Preview Section */
+        .preview-section {
+            margin-top: 40px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        /* Animasi Muncul untuk Kartu Baru */
+        @keyframes cardPop {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Pembungkus luar kartu */
+        .card-wrapper {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 14px;
+            background: transparent;
+            animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .card-wrapper:hover {
+            border-color: #d946ef;
+            transform: scale(1.02);
+        }
+
+        /* Tombol Hapus Kartu (Individual) */
+        .btn-delete-card {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            border: 2px solid #0f172a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+        .btn-delete-card:hover {
+            transform: scale(1.15);
+            background: linear-gradient(135deg, #f87171, #dc2626);
+        }
+
+        /* Kartu bertema Robotik Berwarna */
+        .card-item {
+            background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+            border: 2px solid #06b6d4;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.15);
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+        }
+        
+        /* Efek Dekorasi Sudut Cyber */
+        .card-item::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid;
+            border-width: 0 20px 20px 0;
+            border-color: transparent #f43f5e transparent transparent;
+        }
+
+        .card-header {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #06b6d4, #d946ef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+        .card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            flex-grow: 1;
+        }
+        .card-info {
+            font-size: 13px;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-right: 10px;
+            flex-grow: 1;
+            color: #cbd5e1;
+        }
+        .card-info .text-details {
+            margin-bottom: 8px;
+        }
+        .card-info span {
+            display: block;
+            margin-bottom: 2px;
+        }
+        .card-info b {
+            color: #38bdf8;
+        }
+        .token-box {
+            background: rgba(244, 63, 94, 0.15); 
+            padding: 6px 10px; 
+            border-radius: 6px; 
+            display: inline-block;
+            align-self: flex-start;
+            border-left: 3px solid #f43f5e;
+        }
+        .qrcode-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        /* BINGKAI BARCODE */
+        .qrcode-container {
+            width: 95px;
+            height: 95px;
+            background: #ffffff;
+            border: 2px solid #d946ef;
+            padding: 4px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(217, 70, 239, 0.3);
+            transition: all 0.3s ease;
+        }
+        .card-wrapper:hover .qrcode-container {
+            transform: rotate(3deg);
+            box-shadow: 0 0 20px rgba(217, 70, 239, 0.6);
+        }
+
+        /* STYLE PERBAIKAN TOTAL UNTUK PRINT PDF (Ramah Tinta / Putih Polos) */
+        @media print {
+            body {
+                background: white !important;
+                background-image: none !important;
+                padding: 0;
+                margin: 0;
+                color: #000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            body::before { display: none !important; }
+            .form-section, .btn-action-container, h2, .preview-section h3, .btn-delete-card {
+                display: none !important;
+            }
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .card-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0px !important; 
+                padding: 0px !important;
+                margin: 0 !important;
+            }
+            .card-wrapper {
+                border: 1px dashed #666666 !important; 
+                padding: 10px !important;
+                border-radius: 0px !important;
+                background: transparent !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                transform: none !important;
+                animation: none !important;
+            }
+            .card-item {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                border: 2px solid #000000 !important;
+                box-shadow: none !important;
+                background: #ffffff !important;
+                min-height: 165px !important;
+                height: auto !important;
+                border-radius: 6px !important;
+            }
+            .card-item::after {
+                display: none !important;
+            }
+            .card-title {
+                color: #000000 !important;
+                -webkit-text-fill-color: #000000 !important;
+                background: none !important;
+            }
+            .card-header {
+                border-bottom: 2px dashed #000000 !important;
+            }
+            .card-info {
+                color: #000000 !important;
+            }
+            .card-info b {
+                color: #000000 !important;
+            }
+            .token-box {
+                background-color: #eeeeee !important;
+                border-left: 3px solid #000000 !important;
+                color: #000000 !important;
+            }
+            .qrcode-container {
+                border: 1px solid #000000 !important;
+                background-color: #ffffff !important;
+                box-shadow: none !important;
+                transform: none !important;
+            }
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h2>Sistem Generator Kartu Ujian SMA Negeri 12 Kaur</h2>
+
+    <div class="form-section">
+        <h3>Opsi 1: Input Manual Data</h3>
+        <div class="form-group">
+            <label>Nama Pelajaran / Divisi</label>
+            <input type="text" id="manual-pelajaran" placeholder="Contoh: Matematika">
+        </div>
+        <div class="form-group">
+            <label>Kelas</label>
+            <input type="text" id="manual-kelas" placeholder="Contoh: XI MIPA atau X">
+        </div>
+        <div class="form-group">
+            <label>Guru</label>
+            <input type="text" id="manual-guru" placeholder="Contoh: Doni Stiawan, S.Pd., Gr">
+        </div>
+        <div class="form-group">
+            <label>Hari & Tanggal Ujian</label>
+            <input type="text" id="manual-hari" placeholder="Contoh: Senin, 02 Maret 2026">
+        </div>
+        <div class="form-group">
+            <label>Token</label>
+            <input type="text" id="manual-token" placeholder="Contoh: sesuaikan dengan token google form">
+        </div>
+        <div class="form-group">
+            <label>Link Soal</label>
+            <input type="text" id="manual-link" placeholder="Contoh: https://forms.gle/xxxx">
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary" onclick="tambahManual()">Tambah Ke Database</button>
+            <button class="btn btn-danger" onclick="resetForm()">Reset Form</button>
+        </div>
+
+        <div class="divider"><span>ATAU CORE SYSTEM</span></div>
+
+        <h3>Opsi 2: Sinkronisasi Via File Excel</h3>
+        <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: -10px;">
+            Struktur Kolom: <b>Pelajaran</b> | <b>Kelas</b> | <b>Nama Guru</b> | <b>Hari Ujian</b> | <b>Token</b> | <b>Link</b> (Gunakan baris ke-1 sebagai Header)
+        </p>
+        <div class="form-group">
+            <input type="file" id="excel-file" accept=".xlsx, .xls">
+        </div>
+        <button class="btn btn-success" onclick="prosesExcel()">Proses & Unggah Data</button>
+    </div>
+
+    <div class="preview-section">
+        <div class="btn-action-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>Daftar Kartu Ujian Terbaca</h3>
+            <div>
+                <button class="btn btn-danger" onclick="hapusSemua()">Wipe All Data</button>
+                <button class="btn btn-success" style="background: linear-gradient(135deg, #d946ef 0%, #8b5cf6 100%); color: white;" onclick="window.print()">Cetak / Ekspor PDF</button>
+            </div>
+        </div>
+         
+        <div class="card-grid" id="card-container"></div>
+    </div>
+</div>
+
+<script>
+    let daftarData = [];
+
+    function tambahManual() {
+        const pelajaran = document.getElementById('manual-pelajaran').value.trim();
+        const kelas = document.getElementById('manual-kelas').value.trim();
+        const guru = document.getElementById('manual-guru').value.trim();
+        const hari = document.getElementById('manual-hari').value.trim();
+        const token = document.getElementById('manual-token').value.trim();
+        const link = document.getElementById('manual-link').value.trim();
+
+        if(!pelajaran || !kelas || !guru || !hari || !token || !link) {
+            alert("Sistem Error: Harap lengkapi semua parameter data!");
+            return;
+        }
+
+        daftarData.push({ pelajaran, kelas, guru, hari, token, link });
+        renderKartu();
+    }
+
+    function resetForm() {
+        if(confirm("Apakah Anda yakin ingin mengosongkan seluruh kolom input manual?")) {
+            document.getElementById('manual-pelajaran').value = '';
+            document.getElementById('manual-kelas').value = '';
+            document.getElementById('manual-guru').value = '';
+            document.getElementById('manual-hari').value = '';
+            document.getElementById('manual-token').value = '';
+            document.getElementById('manual-link').value = '';
+        }
+    }
+
+    function prosesExcel() {
+        const fileInput = document.getElementById('excel-file');
+        const file = fileInput.files[0];
+
+        if(!file) {
+            alert("Sistem Error: File excel tidak terdeteksi!");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+             
+            for(let i = 1; i < json.length; i++) {
+                let row = json[i];
+                if(row[0] && row[1] && row[2] && row[3] && row[4] && row[5]) {
+                    daftarData.push({
+                        pelajaran: row[0].toString(),
+                        kelas: row[1].toString(),
+                        guru: row[2].toString(),
+                        hari: row[3].toString(),
+                        token: row[4].toString(),
+                        link: row[5].toString()
+                    });
+                }
+            }
+            renderKartu();
+            fileInput.value = "";
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function renderKartu() {
+        const container = document.getElementById('card-container');
+        container.innerHTML = "";
+
+        if(daftarData.length === 0) {
+            container.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: #94a3b8;'>Sistem Kosong. Silakan masukkan data manual atau unggah database Excel.</p>";
+            return;
+        }
+
+        const urutanHari = {
+            "senin": 1, "selasa": 2, "rabu": 3, "kamis": 4, "jumat": 5, "jum'at": 5, "sabtu": 6
+        };
+
+        daftarData.sort((a, b) => {
+            let hariA = a.hari.toLowerCase().split(/[\s,]+/)[0];
+            let hariB = b.hari.toLowerCase().split(/[\s,]+/)[0];
+            let bobotA = urutanHari[hariA] || 99;
+            let bobotB = urutanHari[hariB] || 99;
+            return bobotA - bobotB;
+        });
+
+        daftarData.forEach((item, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card-wrapper';
+            wrapper.style.animationDelay = `${index * 0.05}s`;
+             
+            wrapper.innerHTML = `
+                <button class="btn-delete-card" onclick="hapusKartu(${index})" title="Hapus Kartu Ini">×</button>
+                <div class="card-item">
+                    <div class="card-header">
+                        <div class="card-title">KARTU AKSES UJIAN</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-info">
+                            <div class="text-details">
+                                <span><b>Mata Pelajaran:</b> ${item.pelajaran}</span>
+                                <span><b>Kelas:</b> ${item.kelas}</span>
+                                <span><b>Instruktur:</b> ${item.guru}</span>
+                                <span><b>Hari Ujian:</b> ${item.hari}</span>
+                            </div>
+                            <span class="token-box">
+                                <b>TOKEN:</b> <span style="font-family: monospace; font-size:14px; color:#f43f5e; font-weight: bold;">${item.token}</span>
+                            </span>
+                        </div>
+                        <div class="qrcode-wrapper">
+                            <div class="qrcode-container" id="qrcode-${index}"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+             
+            container.appendChild(wrapper);
+
+            new QRCode(document.getElementById(`qrcode-${index}`), {
+                text: item.link,
+                width: 85,
+                height: 85,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.M 
+            });
+        });
+    }
+
+    function hapusKartu(index) {
+        if(confirm("Apakah Anda yakin ingin menghapus kartu ujian ini?")) {
+            daftarData.splice(index, 1);
+            renderKartu();
+        }
+    }
+
+    function hapusSemua() {
+        if(confirm("Apakah Anda yakin ingin menghapus sistem seluruh data kartu?")) {
+            daftarData = [];
+            renderKartu();
+        }
+    }
+</script>
+</body>
+</html>
